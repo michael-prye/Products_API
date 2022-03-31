@@ -1,3 +1,4 @@
+from os import stat
 from rest_framework.decorators import api_view
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
@@ -8,7 +9,7 @@ from products import serializers
 
 
 @api_view(['GET', 'POST'])
-def get_products(request):
+def all_products(request):
     if request.method == 'GET':
         query_set = Product.objects.all()
         serializer = ProductSerializer(query_set, many=True)
@@ -19,8 +20,8 @@ def get_products(request):
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-@api_view(['GET', 'put'])
-def get_single_product(request, pk):
+@api_view(['GET', 'PUT', 'DELETE'])
+def single_product(request, pk):
     query_set= get_object_or_404(Product,pk=pk)
     if request.method == 'GET':
         serializer = ProductSerializer(query_set)
@@ -30,3 +31,6 @@ def get_single_product(request, pk):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
+    elif request.method == 'DELETE':
+        query_set.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
